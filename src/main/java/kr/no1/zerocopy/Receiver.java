@@ -73,24 +73,16 @@ public class Receiver extends Thread {
 
 		while (isRunning) {
 			socketChannel = serverSocketChannel.accept();
-			socketChannel.configureBlocking(true);
 
 			LOGGER.info("Accepted : {}", socketChannel);
 
-			boolean isReadContinue = true;
-			while (isReadContinue) {
-				try {
-					isReadContinue = socketChannel.read(buffer) > -1;
-				} catch (ClosedByInterruptException e) {
-					isReadContinue = false;
-				} catch (IOException e) {
-					LOGGER.info("Byte read error.", e);
-					isReadContinue = false;
-				}
-
-				// data not use
-				buffer.rewind();
+			while(socketChannel.read(buffer) > 0) {
+				buffer.flip();
+//				fileChannel.write(buffer);
+				LOGGER.info(buffer.toString());
+				buffer.clear();
 			}
+
 		}
 	}
 }

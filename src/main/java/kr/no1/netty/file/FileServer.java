@@ -20,7 +20,7 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.example.util.ServerUtil;
+//import io.netty.example.util.ServerUtil;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.ssl.SslContext;
@@ -37,7 +37,7 @@ public final class FileServer {
 
     public static void main(String[] args) throws Exception {
         // Configure SSL.
-        final SslContext sslCtx = ServerUtil.buildSslContext();
+//        final SslContext sslCtx = ServerUtil.buildSslContext();
 
         // Configure the server.
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
@@ -52,9 +52,9 @@ public final class FileServer {
                  @Override
                  public void initChannel(SocketChannel ch) throws Exception {
                      ChannelPipeline p = ch.pipeline();
-                     if (sslCtx != null) {
-                         p.addLast(sslCtx.newHandler(ch.alloc()));
-                     }
+//                     if (sslCtx != null) {
+//                         p.addLast(sslCtx.newHandler(ch.alloc()));
+//                     }
 //                     p.addLast(new StringEncoder(CharsetUtil.UTF_8));
 //                     p.addLast(new LineBasedFrameDecoder(8192));
 //                     p.addLast(new StringDecoder(CharsetUtil.UTF_8));

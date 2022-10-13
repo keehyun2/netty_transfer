@@ -3,7 +3,6 @@ package kr.no1.netty.test;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.example.objectecho.FileUploadFile;
 
 import static io.netty.channel.ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE;
 
@@ -13,10 +12,10 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
 	public void channelActive(ChannelHandlerContext ctx) throws Exception {
 		System.out.println("ClientHandler channelActive");
 
-		FileUploadFile f = new FileUploadFile();
-		f.setFile_md5("zxczxc");
-		ChannelFuture future = ctx.writeAndFlush(f);
-		future.addListener(FIRE_EXCEPTION_ON_FAILURE); // Let object serialisation exceptions propagate.
+//		FileUploadFile f = new FileUploadFile();
+//		f.setFile_md5("zxczxc");
+//		ChannelFuture future = ctx.writeAndFlush(f);
+//		future.addListener(FIRE_EXCEPTION_ON_FAILURE); // Let object serialisation exceptions propagate.
 
 //		ByteBuf buf = Unpooled.buffer();
 //		buf.writeByte(0);
