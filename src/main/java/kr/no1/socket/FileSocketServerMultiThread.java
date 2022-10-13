@@ -1,4 +1,4 @@
-package kr.humanbase.socket;
+package kr.no1.socket;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.time.StopWatch;
