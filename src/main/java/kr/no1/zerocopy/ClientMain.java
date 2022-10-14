@@ -22,7 +22,7 @@ public class ClientMain {
 		String path = "C:\\Users\\khpark\\Downloads\\eclipse-inst-jre-win64.exe";
 
 
-		SenderUtil.send(host, port, path, ZERO_COPY);
+		SenderUtil.fileSend(host, port, path, ZERO_COPY);
 
 		LOGGER.info("ClientMain end!");
 	}
