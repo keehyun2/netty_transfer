@@ -1,43 +1,63 @@
 package kr.no1.zerocopy;
 
-import org.apache.commons.lang3.time.StopWatch;
+import org.apache.commons.lang3.SerializationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ServerMain {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ServerMain.class);
 	private static final int CAPACITY = 1024 * 1024 * 2; // 2 MB
 	private static final int PORT = 8080;
 
-	public static void main(String[] arguments) throws IOException {
+	public static void main(String[] arguments) throws IOException, InterruptedException {
 		LOGGER.info("ServerMain start!");
-		StopWatch stopWatch = new StopWatch();
-		while (true) {
-			try (ServerSocketChannel serverSocketChannel = ServerSocketChannel.open()) {
-				serverSocketChannel.socket().bind(new InetSocketAddress(PORT));
-				serverSocketChannel.configureBlocking(true);
 
-				try (SocketChannel socketChannel = serverSocketChannel.accept()) {
-					stopWatch.start();
-					LOGGER.info("Accepted : {}", socketChannel);
+		ServerChannel sc = new ServerChannel(PORT, 8);
 
-					readStringBuf(socketChannel);
+		sc.openSocketChannel((socketChannel) -> {
+			try {
+				Map<String, Object> map = readHashMap(socketChannel);
+//				readStringBuf(socketChannel);
+//				if(map.containsKey("TYPE") ){
+//					String type = map.get("TYPE").toString();
+//					switch (type){
+//						case "FILE":
+//							System.out.println("");
+//							break;
+//						case "file1":
+//							break;
+//						default:
+//					}
+//					readFileBuf(socketChannel);
+//				}
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		});
+	}
 
-//					int size = readFileBuf(socketChannel);
-
-					stopWatch.stop();
-					LOGGER.info("실행시간 : {} milliseconds", stopWatch.getTime());
-					stopWatch.reset();
-				}
+	private static HashMap<String, Object> readHashMap(SocketChannel socketChannel) throws IOException {
+		HashMap<String, Object> result = new HashMap<>();
+		ByteBuffer buf = ByteBuffer.allocate(4);
+		if (socketChannel.read(buf) > -1) {
+			buf.flip();
+			int size = buf.getInt();
+//			LOGGER.info("HashMap<String, Object> 크기(byte) : {}", size);
+			ByteBuffer buf2 = ByteBuffer.allocate(size);
+			if (socketChannel.read(buf2) > -1) {
+				buf2.flip();
+				result = SerializationUtils.deserialize(buf2.array());
+				LOGGER.info("해시맵 : {}, size {}", result, size);
 			}
 		}
+		return result;
 	}
 
 	private static String readStringBuf(SocketChannel socketChannel) throws IOException {
