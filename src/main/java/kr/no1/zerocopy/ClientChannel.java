@@ -91,16 +91,17 @@ public class ClientChannel {
 						buff = convertToBuffer(byteArr);
 						writeBytes += socketChannel.write(buff);
 
+
 						writeBytes += sendFile(socketChannel, Paths.get(cFile.sourceFile()));
 					}
 					default -> throw new IllegalStateException("Unexpected value: " + data);
 				}
 			}
-			return writeBytes;
 		} catch (IOException e) {
 			LOGGER.error("Send error", e);
 			return -1;
 		}
+		return writeBytes;
 	}
 
 	private ByteBuffer convertToBuffer(byte[] byteArr) {
@@ -127,7 +128,7 @@ public class ClientChannel {
 			while (fileSize > 0) { // we still have bytes to transfer
 				long transferBytes = fileChannel.transferTo(position, fileSize, socketChannel);
 				if (transferBytes > 0) {
-					LOGGER.info("transferBytes : {}", transferBytes);
+					LOGGER.debug("transferBytes : {}", transferBytes);
 					position += transferBytes; // seeking position to last byte transferred
 					fileSize -= transferBytes;
 					writeBytes += transferBytes;

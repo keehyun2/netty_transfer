@@ -13,7 +13,7 @@ public class ServerMain {
 	private static final String COMPOSITE_FILE = "COMPOSITE_FILE";
 	private static final String STRING = "STRING";
 
-	public static void main(String[] arguments) throws IOException, InterruptedException {
+	public static void main(String[] arguments) throws IOException {
 		LOGGER.info("ServerMain start!");
 		ServerChannel sc = new ServerChannel(PORT, N_THREAD);
 		sc.openSocketChannel(socketChannel -> {

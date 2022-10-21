@@ -22,6 +22,7 @@ public class ClientMain {
 	private static final int CAPACITY = 1024 * 1024 * 2; // 2 MB
 
 	private static final String HOST = "127.0.0.1";
+//	private static final String HOST = "172.24.180.229";
 	private static final int PORT = 8080;
 
 	public static void main(String[] arguments) {
@@ -39,7 +40,8 @@ public class ClientMain {
 		aList.parallelStream().forEach(v -> {
 			ClientChannel cc = new ClientChannel(HOST, PORT);
 			String source = "C:\\Users\\khpark\\Desktop\\업무파일\\소스\\ideaIU-2022.2.1.exe";
-			String dest = "C:\\Users\\khpark\\Desktop\\업무파일\\목적지\\ideaIU-2022.2.1.exe";
+//			String dest = "C:\\Users\\HB01\\Desktop\\목적지\\ideaIU-2022.2.1.exe";
+			String dest = "C:\\Users\\khpark\\Desktop\\업무파일\\소스\\ideaIU-2022.2.1.exe";
 			cc.write(new CompositeFile(source, dest, 1));
 //			cc.write("한글");
 //			cc.write(smallFile);
