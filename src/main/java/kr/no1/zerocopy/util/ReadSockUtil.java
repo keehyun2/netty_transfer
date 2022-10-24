@@ -52,9 +52,9 @@ public class ReadSockUtil {
 				fileSize -= buffer.limit();
 				buffer.clear();
 
-				if (fileSize < CAPACITY) {
-					buffer = ByteBuffer.allocateDirect(Math.toIntExact(fileSize));
-				}
+//				if (fileSize < CAPACITY) {
+//					buffer = ByteBuffer.allocateDirect(Math.toIntExact(fileSize));
+//				}
 			}
 			LOGGER.info("End! File read");
 		}

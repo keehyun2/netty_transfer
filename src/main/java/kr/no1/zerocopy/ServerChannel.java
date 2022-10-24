@@ -97,11 +97,11 @@ public class ServerChannel {
 		}
 		stopWatch.stop();
 		float time = stopWatch.getTime() / 1000f;
-		long size = cf.size();
+		long size = cf.size(); // byte
 		String size2 = FileUtils.byteCountToDisplaySize(size);
-		float speed = size / time / 1024f / 1024f / 1024f;
+		float speed = size / time / 1024f / 1024f * 8; // MB/s * 8bit = Mbps
 
-		LOGGER.info("파일 전송시간: {} s, 파일 크기: {}({}), 속도(GB/s): {} ", time, size, size2, speed);
+		LOGGER.info("파일 전송시간: {} s, 파일 크기: {}({}), 속도(Mbps): {} ", time, size, size2, speed);
 
 	}
 
