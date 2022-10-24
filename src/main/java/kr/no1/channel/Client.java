@@ -1,5 +1,7 @@
 package kr.no1.channel;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,8 +20,12 @@ public class Client {
 	public static void main(String[] args) throws IOException {
 		LOGGER.info("Client start!");
 		try (SocketChannel socketChannel = SocketChannel.open()) {
-			socketChannel.connect(new InetSocketAddress("172.24.180.229", 20000));
+			socketChannel.connect(new InetSocketAddress("127.0.0.1", 20000));
+//			socketChannel.connect(new InetSocketAddress("172.24.180.229", 20000));
 			socketChannel.configureBlocking(true);
+
+			StopWatch stopWatch = new StopWatch();
+			stopWatch.start();
 
 			long sendSize = 0;
 
@@ -34,6 +40,13 @@ public class Client {
 				sendSize += socketChannel.write(byteBuffer);
 				byteBuffer.clear();
 			}
+
+			stopWatch.stop();
+			float time = stopWatch.getTime() / 1000f;
+			String size2 = FileUtils.byteCountToDisplaySize(size);
+			float speed = size / time / 1024f / 1024f * 8; // MB/s * 8bit = Mbps
+
+			LOGGER.info("전송시간: {} s, 크기: {}({}), 속도(Mbps): {} ", time, size, size2, speed);
 
 		}
 	}
