@@ -5,11 +5,16 @@ import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class Client {
 
@@ -20,26 +25,37 @@ public class Client {
 	public static void main(String[] args) throws IOException {
 		LOGGER.info("Client start!");
 		try (SocketChannel socketChannel = SocketChannel.open()) {
-			socketChannel.connect(new InetSocketAddress("127.0.0.1", 20000));
-//			socketChannel.connect(new InetSocketAddress("172.24.180.229", 20000));
+//			socketChannel.connect(new InetSocketAddress("127.0.0.1", 20000));
+			socketChannel.connect(new InetSocketAddress("172.24.180.229", 20000));
 			socketChannel.configureBlocking(true);
 
 			StopWatch stopWatch = new StopWatch();
 			stopWatch.start();
 
-			long sendSize = 0;
-
-			ByteBuffer byteBuffer = ByteBuffer.allocate(CAPACITY);
-			while(size > sendSize){
-				int i = 0;
-				while(CAPACITY > i){
-					byteBuffer.put((byte) (i/128));
-					i++;
+			Path path = Paths.get("C:\\Users\\khpark\\Desktop\\업무파일\\소스\\dummyfile-5GB(40Gbit).temp");
+			try (RandomAccessFile randomAccessFile = new RandomAccessFile(path.toFile(), "r");
+				 FileChannel fileChannel = randomAccessFile.getChannel()
+			) {
+				long fileSize = fileChannel.size();
+				long position = 0;
+				while (fileSize > position) { // we still have bytes to transfer
+					position += fileChannel.transferTo(position, fileSize, socketChannel);
 				}
-				byteBuffer.flip();
-				sendSize += socketChannel.write(byteBuffer);
-				byteBuffer.clear();
+			} catch (IOException e) {
+				LOGGER.error("ERROR IOException", e);
 			}
+
+//			ByteBuffer byteBuffer = ByteBuffer.allocate(CAPACITY);
+//			while(size > sendSize){
+//				int i = 0;
+//				while(CAPACITY > i){
+//					byteBuffer.put((byte) (i/128));
+//					i++;
+//				}
+//				byteBuffer.flip();
+//				sendSize += socketChannel.write(byteBuffer);
+//				byteBuffer.clear();
+//			}
 
 			stopWatch.stop();
 			float time = stopWatch.getTime() / 1000f;
