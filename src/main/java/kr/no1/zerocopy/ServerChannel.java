@@ -1,7 +1,9 @@
 package kr.no1.zerocopy;
 
 import kr.no1.zerocopy.data.CompositeFile;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SerializationUtils;
+import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,10 +20,13 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+import static kr.no1.zerocopy.util.ReadSockUtil.readFileBuffer;
+import static kr.no1.zerocopy.util.ReadSockUtil.readObj;
 
 public class ServerChannel {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ServerChannel.class);
-	private static final int CAPACITY = 1024 * 1024 * 2; // 2 MB
 	private final int port;
 	private final ExecutorService es;
 
@@ -41,22 +46,9 @@ public class ServerChannel {
 		}
 	}
 
-	private <T> T readObj(SocketChannel socketChannel) throws IOException {
-		T resultList = null;
-		ByteBuffer buf = ByteBuffer.allocate(Integer.BYTES);
-		if (socketChannel.read(buf) > -1) {
-			buf.flip();
-			int size = buf.getInt();
-			ByteBuffer buf2 = ByteBuffer.allocate(size);
-			if (socketChannel.read(buf2) > -1) {
-				buf2.flip();
-				resultList = SerializationUtils.deserialize(buf2.array());
-				LOGGER.info("Object : {}, 크기(byte) : {}", resultList, size);
-			}
-		}
-		return resultList;
-	}
-
+	/**
+	 * 버퍼에서 리스트 객체를 읽어들입니다.
+	 */
 	public <T> List<T> readList(SocketChannel socketChannel) throws IOException {
 		List<T> resultList = null;
 		ByteBuffer buf = ByteBuffer.allocate(Integer.BYTES);
@@ -89,37 +81,28 @@ public class ServerChannel {
 		return result;
 	}
 
-	public CompositeFile readCompositeFile(SocketChannel socketChannel) throws IOException {
+	public void readCompositeFile(SocketChannel socketChannel) throws IOException {
+		StopWatch stopWatch = new StopWatch();
+		stopWatch.start();
+
 		CompositeFile cf = readObj(socketChannel);
-		Path path = Paths.get(cf.destFile());
+		Path path = Paths.get(cf.destFile() + ".tempFile");
 
 		try (RandomAccessFile randomAccessFile = new RandomAccessFile(path.toFile(), "rw");
 			 FileChannel fileChannel = randomAccessFile.getChannel()
 		) {
-			readFileBuffer(socketChannel, fileChannel::write);
+//			readFileBuffer(socketChannel, fileChannel::write);
+			readFileBuffer(socketChannel, (buff) -> {
+			});
 		}
-		return cf;
+		stopWatch.stop();
+		float time = stopWatch.getTime() / 1000f;
+		long size = cf.size();
+		String size2 = FileUtils.byteCountToDisplaySize(size);
+		float speed = size / time / 1024f / 1024f / 1024f;
+
+		LOGGER.info("파일 전송시간: {} s, 파일 크기: {}({}), 속도(GB/s): {} ", time, size, size2, speed);
+
 	}
 
-	private void readFileBuffer(SocketChannel socketChannel, ThrowingConsumer<ByteBuffer> consumer) throws IOException {
-		ByteBuffer buf = ByteBuffer.allocate(Long.BYTES);
-		if (socketChannel.read(buf) > -1) {
-			buf.flip();
-			long fileSize = buf.getLong();
-			LOGGER.info("Start! File read, size : {} byte", fileSize);
-			ByteBuffer buffer = ByteBuffer.allocateDirect(CAPACITY);
-			while (socketChannel.read(buffer) > -1 && fileSize > 0) {
-				buffer.flip();
-				LOGGER.debug("remain size : {}, buffer {}", fileSize, buffer);
-				consumer.accept(buffer);
-				fileSize -= buffer.limit();
-				buffer.clear();
-
-				if (fileSize < CAPACITY) {
-					buffer = ByteBuffer.allocateDirect(Math.toIntExact(fileSize));
-				}
-			}
-			LOGGER.info("End! File read");
-		}
-	}
 }
