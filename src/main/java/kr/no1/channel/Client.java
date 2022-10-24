@@ -18,7 +18,7 @@ public class Client {
 	public static void main(String[] args) throws IOException {
 		LOGGER.info("Client start!");
 		try (SocketChannel socketChannel = SocketChannel.open()) {
-			socketChannel.connect(new InetSocketAddress("127.0.0.1", 20000));
+			socketChannel.connect(new InetSocketAddress("172.24.180.229", 20000));
 			socketChannel.configureBlocking(true);
 
 			long sendSize = 0;

@@ -20,28 +20,29 @@ public class Server {
 	public static void main(String[] args) throws IOException {
 		LOGGER.info("Server start!");
 
-		StopWatch stopWatch = new StopWatch();
-		stopWatch.start();
-
-		long size = 0;
 		try (ServerSocketChannel serverSocketChannel = ServerSocketChannel.open()) {
 			serverSocketChannel.socket().bind(new InetSocketAddress(20000));
 			serverSocketChannel.configureBlocking(true);
-			SocketChannel socketChannel = serverSocketChannel.accept(); // 새로운 연결이 들어올때까지 blocking 됨
-			ByteBuffer buffer = ByteBuffer.allocateDirect(CAPACITY);
-			while (socketChannel.read(buffer) > -1 ) {
-				buffer.flip();
-				size += buffer.limit();
-				buffer.clear();
+			try (SocketChannel socketChannel = serverSocketChannel.accept()) { // 새로운 연결이 들어올때까지 blocking 됨
+				StopWatch stopWatch = new StopWatch();
+				stopWatch.start();
+
+				long size = 0;
+				ByteBuffer buffer = ByteBuffer.allocateDirect(CAPACITY);
+				while (socketChannel.read(buffer) > -1) {
+					buffer.flip();
+					size += buffer.limit();
+					buffer.clear();
+				}
+				stopWatch.stop();
+				float time = stopWatch.getTime() / 1000f;
+				String size2 = FileUtils.byteCountToDisplaySize(size);
+				float speed = size / time / 1024f / 1024f * 8; // MB/s * 8bit = Mbps
+
+				LOGGER.info("전송시간: {} s, 크기: {}({}), 속도(Mbps): {} ", time, size, size2, speed);
 			}
-			socketChannel.close();
 		}
 
-		stopWatch.stop();
-		float time = stopWatch.getTime() / 1000f;
-		String size2 = FileUtils.byteCountToDisplaySize(size);
-		float speed = size / time / 1024f / 1024f * 8; // MB/s * 8bit = Mbps
 
-		LOGGER.info("전송시간: {} s, 크기: {}({}), 속도(Mbps): {} ", time, size, size2, speed);
 	}
 }
