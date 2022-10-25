@@ -15,15 +15,18 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
+import java.util.stream.LongStream;
 
 public class Client {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Client.class);
-	private static final int CAPACITY = 1024 * 1024 * 2; // 2 MB
-	private static final long size = 5368709120L; // 5 GB
+	private static final int CAPACITY = 1024 * 1024 * 1; // 1 MB
+	private static final long size = 1073741824L; // 1 GB
 
 	public static void main(String[] args) throws IOException {
 		LOGGER.info("Client start!");
+
 		try (SocketChannel socketChannel = SocketChannel.open()) {
 //			socketChannel.connect(new InetSocketAddress("127.0.0.1", 20000));
 			socketChannel.connect(new InetSocketAddress("172.24.180.229", 20000));
@@ -32,7 +35,7 @@ public class Client {
 			StopWatch stopWatch = new StopWatch();
 			stopWatch.start();
 
-			Path path = Paths.get("C:\\Users\\khpark\\Desktop\\업무파일\\소스\\dummyfile-5GB(40Gbit).temp");
+			Path path = Paths.get("C:\\Users\\khpark\\Desktop\\업무파일\\소스\\dummyfile-1GB(8Gbit).temp");
 			try (RandomAccessFile randomAccessFile = new RandomAccessFile(path.toFile(), "r");
 				 FileChannel fileChannel = randomAccessFile.getChannel()
 			) {
@@ -45,6 +48,7 @@ public class Client {
 				LOGGER.error("ERROR IOException", e);
 			}
 
+//			long sendSize = 0;
 //			ByteBuffer byteBuffer = ByteBuffer.allocate(CAPACITY);
 //			while(size > sendSize){
 //				int i = 0;
@@ -65,5 +69,6 @@ public class Client {
 			LOGGER.info("전송시간: {} s, 크기: {}({}), 속도(Mbps): {} ", time, size, size2, speed);
 
 		}
+
 	}
 }

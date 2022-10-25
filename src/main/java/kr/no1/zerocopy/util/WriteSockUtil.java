@@ -28,33 +28,29 @@ public class WriteSockUtil {
 	}
 
 	public static long sendFile(SocketChannel socketChannel, Path path) {
-		long writeBytes = 0;
+		long position = 0;
 		try (RandomAccessFile randomAccessFile = new RandomAccessFile(path.toFile(), "r");
 			 FileChannel fileChannel = randomAccessFile.getChannel()
 		) {
+			// write 파일 사이즈
 			long fileSize = fileChannel.size();
 			ByteBuffer byteBuffer = ByteBuffer.allocate(Long.BYTES);
 			byteBuffer.putLong(fileSize);
 			byteBuffer.flip();
 			socketChannel.write(byteBuffer);
-			// file buffer
-			LOGGER.info("fileChannel : {}, position: {}, size : {}", fileChannel, fileChannel.position(), fileSize);
-			long position = 0;
-			while (fileSize > 0) { // we still have bytes to transfer
+
+			// write 파일 전송
+			while (fileSize != position) {
 				long transferBytes = fileChannel.transferTo(position, fileSize, socketChannel);
 				if (transferBytes > 0) {
-					LOGGER.debug("transferBytes : {}", transferBytes);
-					position += transferBytes; // seeking position to last byte transferred
-					fileSize -= transferBytes;
-					writeBytes += transferBytes;
+					position += transferBytes;
 				}
 			}
-			LOGGER.info("FILE size(BYTE) : {}", fileChannel.size());
 		} catch (FileNotFoundException e) {
 			LOGGER.error("ERROR FileNotFoundException", e);
 		} catch (IOException e) {
 			LOGGER.error("ERROR IOException", e);
 		}
-		return writeBytes;
+		return position;
 	}
 }
